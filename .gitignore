@@ -1,0 +1,11 @@
+backend/.env
+*.env
+*.env.*
+!*.env.example
+backend/database/database.sqlite
+frontend/node_modules
+frontend/dist
+backend/vendor
+node_modules
+package-lock.json
+package.json
