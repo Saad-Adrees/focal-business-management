@@ -71,7 +71,30 @@ const nav: { id: View; label: string; icon: string }[] = [
   { id: "invoices", label: "Invoices", icon: "▤" },
 ];
 
+type Theme = "light" | "dark";
+
+function ThemeToggle({ theme, onToggle }: { theme: Theme; onToggle: () => void }) {
+  const isDark = theme === "dark";
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={onToggle}
+      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      title={`Switch to ${isDark ? "light" : "dark"} mode`}
+    >
+      <span aria-hidden="true">{isDark ? "☀" : "☾"}</span>
+      <span className="theme-toggle-label">{isDark ? "Light" : "Dark"}</span>
+    </button>
+  );
+}
+
 function App() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const savedTheme = localStorage.getItem("focal_theme");
+    if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   const [view, setView] = useState<View>("overview");
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
@@ -94,6 +117,10 @@ function App() {
   const [sessionMessage, setSessionMessage] = useState("");
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("focal_theme", theme);
+  }, [theme]);
   useEffect(() => {
     if (!loggedIn) {
       setUser(null);
@@ -242,9 +269,12 @@ function App() {
     return (
       <main className="auth">
         <div className="auth-card">
-          <div className="brand">
-            <span>F</span>
-            <strong>Focal</strong>
+          <div className="auth-topbar">
+            <div className="brand">
+              <span>F</span>
+              <strong>Focal</strong>
+            </div>
+            <ThemeToggle theme={theme} onToggle={() => setTheme(theme === "light" ? "dark" : "light")} />
           </div>
           <div className="auth-intro">
             <p className="eyebrow">BUSINESS COMMAND CENTER</p>
@@ -463,6 +493,7 @@ function App() {
                 </div>
               )}
             </div>
+            <ThemeToggle theme={theme} onToggle={() => setTheme(theme === "light" ? "dark" : "light")} />
             <button className="bell">
               ⌁<i />
             </button>
